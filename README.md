@@ -1,4 +1,4 @@
-# 📚 Book Library API (Validated Version)
+# 📚 Book Library API
 
 This is a secure and professional RESTful API built with **Node.js** and **Express** for managing a book library.  
 It includes **field validations** and **error handling** to ensure safe and reliable operations.
