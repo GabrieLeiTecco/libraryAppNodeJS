@@ -1,88 +1,57 @@
-import express from 'express';
+// ==========================
+// IMPORTS & CONFIGURATION
+// ==========================
+import express from 'express'; // Import Express framework
+import databaseConnect from './config/dbConnect.js'; // Import database connection function
 
+// ==========================
+// DATABASE CONNECTION
+// ==========================
+const connection = await databaseConnect(); // Establish connection with database
+
+// Listen for errors in database connection
+connection.on("error", (error) => {
+  console.error("An error occurred \n", error);
+});
+
+// Listen for successful database connection
+connection.once("open", () => {
+  console.log("Connection with database successfully occurred");
+});
+
+// ==========================
+// EXPRESS APP SETUP
+// ==========================
 const app = express();
 app.use(express.json()); // Middleware to parse incoming JSON requests
 
-// Array that stores information about books
+// ==========================
+// DATA (IN-MEMORY BOOK LIST)
+// ==========================
 const books = [
-  {
-    id: 1,
-    name: "Pride and Prejudice",
-    author: "Jane Austen",
-    genre: ["Romance"],
-    pageCount: 432
-  },
-  {
-    id: 2,
-    name: "The Fellowship of the Ring",
-    author: "J.R.R. Tolkien",
-    genre: ["Fantasy"],
-    pageCount: 479
-  },
-  {
-    id: 3,
-    name: "Dune",
-    author: "Frank Herbert",
-    genre: ["Science Fiction"],
-    pageCount: 896
-  },
-  {
-    id: 4,
-    name: "The Murder of Roger Ackroyd",
-    author: "Agatha Christie",
-    genre: ["Mystery"],
-    pageCount: 312
-  },
-  {
-    id: 5,
-    name: "The Diary of a Young Girl",
-    author: "Anne Frank",
-    genre: ["Biography"],
-    pageCount: 283
-  },
-  {
-    id: 6,
-    name: "Sapiens: A Brief History of Humankind",
-    author: "Yuval Noah Harari",
-    genre: ["History"],
-    pageCount: 443
-  },
-  {
-    id: 7,
-    name: "Dracula",
-    author: "Bram Stoker",
-    genre: ["Horror"],
-    pageCount: 418
-  },
-  {
-    id: 8,
-    name: "Gulliver's Travels",
-    author: "Jonathan Swift",
-    genre: ["Adventure"],
-    pageCount: 336
-  },
-  {
-    id: 9,
-    name: "Hamlet",
-    author: "William Shakespeare",
-    genre: ["Drama"],
-    pageCount: 160
-  },
-  {
-    id: 10,
-    name: "Leaves of Grass",
-    author: "Walt Whitman",
-    genre: ["Poetry"],
-    pageCount: 736
-  }
+  // Each book has an id, name, author, genre(s), and page count
+  { id: 1, name: "Pride and Prejudice", author: "Jane Austen", genre: ["Romance"], pageCount: 432 },
+  { id: 2, name: "The Fellowship of the Ring", author: "J.R.R. Tolkien", genre: ["Fantasy"], pageCount: 479 },
+  { id: 3, name: "Dune", author: "Frank Herbert", genre: ["Science Fiction"], pageCount: 896 },
+  { id: 4, name: "The Murder of Roger Ackroyd", author: "Agatha Christie", genre: ["Mystery"], pageCount: 312 },
+  { id: 5, name: "The Diary of a Young Girl", author: "Anne Frank", genre: ["Biography"], pageCount: 283 },
+  { id: 6, name: "Sapiens: A Brief History of Humankind", author: "Yuval Noah Harari", genre: ["History"], pageCount: 443 },
+  { id: 7, name: "Dracula", author: "Bram Stoker", genre: ["Horror"], pageCount: 418 },
+  { id: 8, name: "Gulliver's Travels", author: "Jonathan Swift", genre: ["Adventure"], pageCount: 336 },
+  { id: 9, name: "Hamlet", author: "William Shakespeare", genre: ["Drama"], pageCount: 160 },
+  { id: 10, name: "Leaves of Grass", author: "Walt Whitman", genre: ["Poetry"], pageCount: 736 }
 ];
 
-// Function to find the index of a book by its ID
+// ==========================
+// HELPER FUNCTIONS
+// ==========================
+
+// Find index of a book by its ID
 function findBookIndex(id) {
   return books.findIndex(book => book.id === Number(id));
 }
 
-// Function to validate the book object
+// Validate book object structure and types
 function validateBook(book) {
   if (!book.name || typeof book.name !== 'string') {
     return "Book name is required and must be a string.";
@@ -96,20 +65,24 @@ function validateBook(book) {
   if (typeof book.pageCount !== 'number' || book.pageCount <= 0) {
     return "Page count must be a positive number.";
   }
-  return null;
+  return null; // No validation errors
 }
+
+// ==========================
+// ROUTES
+// ==========================
 
 // Root route
 app.get('/', (req, res) => {
   res.status(200).json({ message: 'This is the root path' });
 });
 
-// Route to get all books
+// Get all books
 app.get('/books', (req, res) => {
   res.status(200).json(books);
 });
 
-// Route to get a specific book by ID
+// Get a specific book by ID
 app.get('/books/:id', (req, res) => {
   try {
     const index = findBookIndex(req.params.id);
@@ -122,7 +95,7 @@ app.get('/books/:id', (req, res) => {
   }
 });
 
-// Route to add a new book
+// Add a new book
 app.post('/books', (req, res) => {
   try {
     const validationError = validateBook(req.body);
@@ -136,7 +109,7 @@ app.post('/books', (req, res) => {
   }
 });
 
-// Route to update a book by ID
+// Update an existing book by ID
 app.put('/books/:id', (req, res) => {
   try {
     const index = findBookIndex(req.params.id);
@@ -156,7 +129,7 @@ app.put('/books/:id', (req, res) => {
   }
 });
 
-// Route to delete a book by ID
+// Delete a book by ID
 app.delete('/books/:id', (req, res) => {
   try {
     const index = findBookIndex(req.params.id);
@@ -170,4 +143,7 @@ app.delete('/books/:id', (req, res) => {
   }
 });
 
+// ==========================
+// EXPORT APP
+// ==========================
 export default app;
